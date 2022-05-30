@@ -930,15 +930,15 @@ void QmitkSegmentationView::ValidateSelectionInput()
       if (nullptr != labelSetImage)
       {
         int numberOfLabels = labelSetImage->GetNumberOfLabels(labelSetImage->GetActiveLayer());
-        if (2 == numberOfLabels) // fix for T27319: exterior is label 0, first label is label 1
+        if (2 <= numberOfLabels) // fix for T27319: exterior is label 0, first label is label 1
         {
-          m_Controls->slicesInterpolator->setEnabled(true);
+        m_Controls->slicesInterpolator->setEnabled(true);
         }
-        else
-        {
-          m_Controls->interpolatorWarningLabel->show();
-          m_Controls->interpolatorWarningLabel->setText("<font color=\"red\">Interpolation only works for single label segmentations.</font>");
-        }
+        // else
+        // {
+        //   m_Controls->interpolatorWarningLabel->show();
+        //   m_Controls->interpolatorWarningLabel->setText("<font color=\"red\">Interpolation only works for single label segmentations.</font>");
+        // }
       }
       return;
     }

@@ -71,6 +71,12 @@ namespace mitk
     */
     void SetProgressStepSize(unsigned int stepSize);
 
+    /**
+     * @brief Set the contour value to be extracted if there are multiple contours
+     * 
+     */
+    void SetContourValue(float);
+
   protected:
     ImageToContourFilter();
     ~ImageToContourFilter() override;
@@ -81,6 +87,7 @@ namespace mitk
     const BaseGeometry *m_SliceGeometry;
     bool m_UseProgressBar;
     unsigned int m_ProgressStepSize;
+    float m_ContourValue;
 
     template <typename TPixel, unsigned int VImageDimension>
     void Itk2DContourExtraction(const itk::Image<TPixel, VImageDimension> *sliceImage);

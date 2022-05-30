@@ -12,11 +12,12 @@ found in the LICENSE file.
 
 #include "mitkSegTool2D.h"
 #include "mitkToolManager.h"
-
+#include "mitkIOUtil.h"
 #include "mitkBaseRenderer.h"
 #include "mitkDataStorage.h"
 
 #include "mitkPlaneGeometry.h"
+#include <mitkBinaryThresholdULTool.h>
 
 // Include of the new ImageExtractor
 #include "mitkMorphologicalOperations.h"
@@ -45,6 +46,8 @@ found in the LICENSE file.
 #include "mitkContourModelUtils.h"
 
 #include "itkImageRegionIterator.h"
+
+#include "vtkStringArray.h"
 
 #define ROUND(a) ((a) > 0 ? (int)((a) + 0.5) : -(int)(0.5 - (a)))
 
@@ -147,7 +150,7 @@ void mitk::SegTool2D::UpdateSurfaceInterpolation(const Image *slice,
                                                  bool detectIntersection)
 {
   std::vector<SliceInformation> slices = { SliceInformation(slice, plane, 0)};
-  Self::UpdateSurfaceInterpolation(slices, workingImage, detectIntersection);
+  Self::UpdateSurfaceInterpolation(slices, workingImage, detectIntersection,0);
 }
 
 void  mitk::SegTool2D::RemoveContourFromInterpolator(const SliceInformation& sliceInfo)
@@ -160,7 +163,8 @@ void  mitk::SegTool2D::RemoveContourFromInterpolator(const SliceInformation& sli
 
 void mitk::SegTool2D::UpdateSurfaceInterpolation(const std::vector<SliceInformation>& sliceInfos,
   const Image* workingImage,
-  bool detectIntersection)
+  bool detectIntersection,
+  const unsigned int activeLabelValue)
 {
   if (!m_SurfaceInterpolationEnabled)
     return;
@@ -215,8 +219,8 @@ void mitk::SegTool2D::UpdateSurfaceInterpolation(const std::vector<SliceInformat
 
   for (const auto& sliceInfo : relevantSlices)
   {
-
     contourExtractor->SetInput(sliceInfo.slice);
+    contourExtractor->SetContourValue(activeLabelValue);
     contourExtractor->Update();
     mitk::Surface::Pointer contour = contourExtractor->GetOutput();
 
@@ -226,6 +230,9 @@ void mitk::SegTool2D::UpdateSurfaceInterpolation(const std::vector<SliceInformat
     }
     else
     {
+      vtkIntArray* intArray=vtkIntArray::New();
+      intArray->InsertNextValue(activeLabelValue);
+      contour->GetVtkPolyData()->GetFieldData()->AddArray(intArray);
       contour->DisconnectPipeline();
       contourList.push_back(contour);
     }
@@ -520,6 +527,9 @@ void mitk::SegTool2D::WriteBackSegmentationResults(const DataNode* workingNode, 
   }
 
   auto* image = dynamic_cast<Image*>(workingNode->GetData());
+  mitk::LabelSetImage* lsI=dynamic_cast<mitk::LabelSetImage*>(workingNode->GetData());
+  std::string activeLabel=lsI->GetActiveLabelSet()->GetActiveLabel()->GetName();
+  unsigned int activeLabelValue=lsI->GetActiveLabelSet()->GetActiveLabel()->GetValue();
 
   if (nullptr == image)
   {
@@ -534,7 +544,7 @@ void mitk::SegTool2D::WriteBackSegmentationResults(const DataNode* workingNode, 
     }
   }
 
-  mitk::SegTool2D::UpdateSurfaceInterpolation(sliceList, image, false);
+  mitk::SegTool2D::UpdateSurfaceInterpolation(sliceList, image, false,activeLabelValue);
 
   // also mark its node as modified (T27308). Can be removed if T27307
   // is properly solved
@@ -551,6 +561,7 @@ void mitk::SegTool2D::WriteSliceToVolume(Image* workingImage, const PlaneGeometr
 
 void mitk::SegTool2D::WriteSliceToVolume(Image* workingImage, const SliceInformation &sliceInfo, bool allowUndo)
 {
+  // std::cout << "Entering mitk::SegTool2d::WriteSliceToVolume\n";
   if (nullptr == workingImage)
   {
     mitkThrow() << "Cannot write slice to working node. Working node does not contain an image.";
@@ -623,7 +634,6 @@ void mitk::SegTool2D::WriteSliceToVolume(Image* workingImage, const SliceInforma
     UndoController::GetCurrentUndoModel()->SetOperationEvent(undoStackItem);
     /*============= END undo/redo feature block ========================*/
   }
-
 }
 
 
@@ -636,7 +646,6 @@ void mitk::SegTool2D::SetEnable3DInterpolation(bool enabled)
 {
   m_SurfaceInterpolationEnabled = enabled;
 }
-
 
 int mitk::SegTool2D::AddContourmarker(const PlaneGeometry* planeGeometry, unsigned int sliceIndex)
 {
@@ -733,6 +742,7 @@ void mitk::SegTool2D::InteractiveSegmentationBugMessage(const std::string &messa
 void mitk::SegTool2D::WritePreviewOnWorkingImage(
   Image *targetSlice, const Image *sourceSlice, const Image *workingImage, int paintingPixelValue)
 {
+  std::cout << "mitk::SegTool2D::tWritePreviewOnWorkingImage\n";
   if (nullptr == targetSlice)
   {
     mitkThrow() << "Cannot write preview on working image. Target slice does not point to a valid instance.";

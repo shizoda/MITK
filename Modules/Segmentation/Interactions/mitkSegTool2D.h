@@ -179,7 +179,8 @@ namespace mitk
      */
     static void UpdateSurfaceInterpolation(const std::vector<SliceInformation>& sliceInfos,
       const Image* workingImage,
-      bool detectIntersection);
+      bool detectIntersection,
+      const unsigned int activeLabelValue);
 
 
     /**

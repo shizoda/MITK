@@ -17,6 +17,7 @@ found in the LICENSE file.
 #include "mitkCommon.h"
 #include "mitkInteractionConst.h"
 #include "mitkProperties.h"
+#include "mitkLabel.h"
 #include "mitkRestorePlanePositionOperation.h"
 #include "mitkSurface.h"
 #include <MitkSurfaceInterpolationExports.h>
@@ -55,9 +56,15 @@ namespace mitk
 
     struct ContourPositionInformation
     {
+      int pos;
       Surface::Pointer contour;
       Vector3D contourNormal;
       Point3D contourPoint;
+      mitk::Label::PixelType labelValue;
+
+      // ContourPositioninformation(): labelValue(0);
+
+
     };
 
     typedef std::vector<ContourPositionInformation> ContourPositionInformationList;
@@ -121,6 +128,13 @@ namespace mitk
     void Interpolate();
 
     mitk::Surface::Pointer GetInterpolationResult();
+
+    /**
+     * @brief Set the Active Label object
+     * 
+     * @param activeLbl 
+     */
+    void SetActiveLabel(std::string& activeLbl);
 
     /**
      * Sets the minimum spacing of the current selected segmentation
@@ -205,6 +219,11 @@ namespace mitk
      */
     double EstimatePortionOfNeededMemory();
 
+    /**
+     * Adds Contours from the active Label to the interpolation pipeline
+     */
+    void AddActiveLabelContoursForInterpolation(const mitk::Label::PixelType& activeLabel);
+
     unsigned int GetNumberOfInterpolationSessions();
 
   protected:
@@ -235,6 +254,7 @@ namespace mitk
     mitk::DataStorage::Pointer m_DataStorage;
 
     ContourListMap m_ListOfInterpolationSessions;
+    ContourListMap m_ListOfContours;
 
     mitk::Surface::Pointer m_InterpolationResult;
 
@@ -245,6 +265,9 @@ namespace mitk
     std::map<mitk::Image *, unsigned long> m_SegmentationObserverTags;
 
     mitk::TimePointType m_CurrentTimePoint;
+
+    unsigned int m_ContourIndex;
+    std::string m_activeLabel;
   };
 }
 #endif

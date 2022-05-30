@@ -18,6 +18,7 @@ found in the LICENSE file.
 #include <mitkExtractSliceFilter.h>
 #include <mitkImageAccessByItk.h>
 //#include <mitkPlaneGeometry.h>
+#include <mitkIOUtil.h>
 
 #include <itkCommand.h>
 #include <itkImage.h>
@@ -556,7 +557,8 @@ mitk::Image::Pointer mitk::SegmentationInterpolationController::Interpolate(unsi
     MITK_ERROR << "Error in 2D interpolation: " << e.what();
     return nullptr;
   }
-
+  mitk::IOUtil::Save(upperSlice,"/home/sid/Desktop/upper.nrrd");
+  mitk::IOUtil::Save(lowerSlice,"/home/sid/Desktop/lower.nrrd");
   // Interpolation algorithm inputs:
   //   - Two segmentations (guaranteed to be of the same data type)
   //   - Orientation of the segmentations (sliceDimension)

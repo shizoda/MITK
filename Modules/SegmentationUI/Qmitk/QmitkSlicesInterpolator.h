@@ -124,6 +124,18 @@ public:
    */
   void Show3DInterpolationResult(bool);
 
+  /**
+   * @brief Function that reacts to a change in the activeLabel.
+   * 
+   */
+  void ActiveLabelChanged(unsigned short);
+
+  /**
+   * @brief Prepare Inputs for 3D Interpolation.
+   * 
+   */
+  void PrepareInputsFor3DInterpolation();
+
 signals:
 
   void SignalRememberContourPositions(bool);

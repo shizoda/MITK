@@ -141,14 +141,25 @@ void mitk::ShapeBasedInterpolationAlgorithm::InterpolateIntermediateSlice(itk::I
   }
 
   float weight[2] = {1.0f - ratio, ratio};
-
+  int numNZs=0;
   while (!lowerIter.IsAtEnd())
   {
     typename DistanceFilterImageType::PixelType lowerPixelVal = lowerIter.Get();
     typename DistanceFilterImageType::PixelType upperPixelVal = upperITK->GetPixel(lowerIter.GetIndex());
+    typename DistanceFilterImageType::PixelType intermediatePixelVal;
+    if(weight[0] * upperPixelVal + weight[1] * lowerPixelVal>0)
+    {
+      intermediatePixelVal=0;
+    }
+    else
+    {
+      numNZs++;
+      // std::cout << "DUDE\n";
+      intermediatePixelVal=1;
+    }
 
-    typename DistanceFilterImageType::PixelType intermediatePixelVal =
-      (weight[0] * upperPixelVal + weight[1] * lowerPixelVal > 0 ? 0 : 1);
+    // typename DistanceFilterImageType::PixelType intermediatePixelVal =
+    //   (weight[0] * upperPixelVal + weight[1] * lowerPixelVal > 0 ? 0 : 1);
 
     result->SetPixel(lowerIter.GetIndex(), static_cast<TPixel>(intermediatePixelVal));
 
