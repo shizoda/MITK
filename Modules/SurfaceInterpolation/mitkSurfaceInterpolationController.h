@@ -62,9 +62,7 @@ namespace mitk
       Point3D contourPoint;
       mitk::Label::PixelType labelValue;
 
-      // ContourPositioninformation(): labelValue(0);
-
-
+      ContourPositionInformation(): pos(-1),labelValue(0){}
     };
 
     typedef std::vector<ContourPositionInformation> ContourPositionInformationList;

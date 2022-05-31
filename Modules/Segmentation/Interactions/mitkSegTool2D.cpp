@@ -561,7 +561,6 @@ void mitk::SegTool2D::WriteSliceToVolume(Image* workingImage, const PlaneGeometr
 
 void mitk::SegTool2D::WriteSliceToVolume(Image* workingImage, const SliceInformation &sliceInfo, bool allowUndo)
 {
-  // std::cout << "Entering mitk::SegTool2d::WriteSliceToVolume\n";
   if (nullptr == workingImage)
   {
     mitkThrow() << "Cannot write slice to working node. Working node does not contain an image.";
@@ -742,7 +741,6 @@ void mitk::SegTool2D::InteractiveSegmentationBugMessage(const std::string &messa
 void mitk::SegTool2D::WritePreviewOnWorkingImage(
   Image *targetSlice, const Image *sourceSlice, const Image *workingImage, int paintingPixelValue)
 {
-  std::cout << "mitk::SegTool2D::tWritePreviewOnWorkingImage\n";
   if (nullptr == targetSlice)
   {
     mitkThrow() << "Cannot write preview on working image. Target slice does not point to a valid instance.";

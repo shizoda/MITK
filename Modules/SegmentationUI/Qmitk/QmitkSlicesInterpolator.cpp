@@ -697,8 +697,6 @@ void QmitkSlicesInterpolator::OnAcceptInterpolationClicked()
     reslice->SetOverwriteMode(true);
     reslice->Modified();
 
-    mitk::IOUtil::Save(slice,"/home/sid/Desktop/slice.nrrd");
-
     const auto timePoint = m_LastSNC->GetSelectedTimePoint();
     if (!m_Segmentation->GetTimeGeometry()->IsValidTimePoint(timePoint))
     {
@@ -720,7 +718,6 @@ void QmitkSlicesInterpolator::OnAcceptInterpolationClicked()
     // the image was modified within the pipeline, but not marked so
     m_Segmentation->Modified();
     m_Segmentation->GetVtkImageData()->Modified();
-    // mitk::IOUtil::Save(m_Segmentation,"/home/sid/Desktop/m_Segmentation.nrrd");
 
     m_FeedbackNode->SetData(nullptr);
     mitk::RenderingManager::GetInstance()->RequestUpdateAll();
@@ -919,79 +916,6 @@ void MergeLabelsFromImageToLabelSetImage(const mitk::Image::Pointer segmentation
   mitk::MultiLabelSegmentation::MergeStyle mergeStyle=mitk::MultiLabelSegmentation::MergeStyle::Merge;
   mitk::MultiLabelSegmentation::OverwriteStyle overwriteStyle=mitk::MultiLabelSegmentation::OverwriteStyle::IgnoreLocks;
   mitk::TransferLabelContent(segmentationLSImage,destImage,labelMapping,mergeStyle,overwriteStyle,timeStep);
-}
-
-
-template <unsigned int VImageDimension = 3>
-void CreateLabelMaskProcessing(mitk::Image *layerImage, mitk::Image *mask, mitk::LabelSet::PixelType index)
-{
-  mitk::ImagePixelReadAccessor<mitk::LabelSet::PixelType, VImageDimension> readAccessor(layerImage);
-  mitk::ImagePixelWriteAccessor<mitk::LabelSet::PixelType, VImageDimension> writeAccessor(mask);
-
-  std::size_t numberOfPixels = 1;
-  for (int dim = 0; dim < static_cast<int>(VImageDimension); ++dim)
-    numberOfPixels *= static_cast<std::size_t>(readAccessor.GetDimension(dim));
-
-  auto src = readAccessor.GetData();
-  auto dest = writeAccessor.GetData();
-
-  for (std::size_t i = 0; i < numberOfPixels; ++i)
-  {
-    if (index == *(src + i))
-      *(dest + i) = 1;
-  }
-}
-
-mitk::Image::Pointer CreateLabelMask(mitk::LabelSetImage* img,mitk::LabelSet::PixelType index, bool useActiveLayer, unsigned int layer)
-{
-  auto previousActiveLayer = img->GetActiveLayer();
-  auto mask = mitk::Image::New();
-
-  try
-  {
-    // mask->Initialize(this) does not work here if this label set image has a single slice,
-    // since the mask would be automatically flattened to a 2-d image, whereas we expect the
-    // original dimension of this label set image. Hence, initialize the mask more explicitly:
-    mask->Initialize(img->GetPixelType(), img->GetDimension(), img->GetDimensions());
-    mask->SetTimeGeometry(img->GetTimeGeometry()->Clone());
-
-    auto byteSize = sizeof(mitk::LabelSetImage::PixelType);
-    for (unsigned int dim = 0; dim < mask->GetDimension(); ++dim)
-      byteSize *= mask->GetDimension(dim);
-
-    {
-      mitk:: ImageWriteAccessor accessor(mask);
-      memset(accessor.GetData(), 0, byteSize);
-    }
-
-    if (!useActiveLayer)
-      img->SetActiveLayer(layer);
-
-    if (4 == img->GetDimension())
-    {
-      ::CreateLabelMaskProcessing<4>(img, mask, index);
-    }
-    else if (3 == img->GetDimension())
-    {
-      ::CreateLabelMaskProcessing(img, mask, index);
-    }
-    else
-    {
-      mitkThrow();
-    }
-  }
-  catch (...)
-  {
-    if (!useActiveLayer)
-      img->SetActiveLayer(previousActiveLayer);
-
-    mitkThrow() << "Could not create a mask out of the selected label.";
-  }
-
-  if (!useActiveLayer)
-    img->SetActiveLayer(previousActiveLayer);
-
-  return mask;
 }
 
 void QmitkSlicesInterpolator::OnAccept3DInterpolationClicked()
@@ -1230,7 +1154,6 @@ void QmitkSlicesInterpolator::OnAcceptAllPopupActivated(QAction *action)
 
 void QmitkSlicesInterpolator::OnInterpolationActivated(bool on)
 {
-  std::cout << "Entering OnInterpolationActivated\n";
   m_2DInterpolationEnabled = on;
 
   try
@@ -1267,11 +1190,9 @@ void QmitkSlicesInterpolator::OnInterpolationActivated(bool on)
     {
       mitk::Image *segmentation = dynamic_cast<mitk::Image *>(workingNode->GetData());
       mitk::LabelSetImage * LSImage=dynamic_cast<mitk::LabelSetImage *>(workingNode->GetData());
-      // mitk::Image::Pointer activeLabelImage=CreateLabelMask(LSImage,LSImage->GetActiveLabel()->GetValue(),true,0);
       mitk::Image::Pointer activeLabelImage=LSImage->CreateLabelMask(LSImage->GetActiveLabelSet()->GetActiveLabel()->GetValue(),true,0);
 
-      std::cout << "activeLabel: " << LSImage->GetActiveLabelSet()->GetActiveLabel()->GetName() << "\n";
-      mitk::IOUtil::Save(activeLabelImage,"/home/sid/Desktop/activeLabel.nrrd");
+
       if (segmentation)
       {
         m_Interpolator->SetSegmentationVolume(activeLabelImage);

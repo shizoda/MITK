@@ -87,7 +87,7 @@ namespace itk
    * \sa Image
    * \sa Path
    * \sa PolyLineParametricPath
-   * 
+   *
    */
   template <class TInputImage>
   class ITK_EXPORT ContourExtractor2DImageFilter : public ImageToPathFilter<TInputImage, PolyLineParametricPath<2>>

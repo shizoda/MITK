@@ -22,7 +22,6 @@ found in the LICENSE file.
 
 #include <mitkIOUtil.h>
 #include "itkImageFileWriter.h"
-// #include "itkImageRegionIterator.h"
 #include <itkThresholdImageFilter.h>
 #include <itkConstantPadImageFilter.h>
 #include <itkMinimumMaximumImageCalculator.h>
@@ -93,24 +92,8 @@ void ExtractImageWithPixelValue(const itk::Image<TPixel,VImageDimension>* im, TP
   thresholdFilter->SetOutsideValue(0);
   thresholdFilter->Update();
   auto threshImage=thresholdFilter->GetOutput();
-
-  // IteratorType  resultIter( clonedImage.GetPointer(), clonedImage->GetRequestedRegion() );
-  // resultIter.GoToBegin();
-  // while( !resultIter.IsAtEnd() )
-  // {
-  //   if(resultIter.Get()!=pixelVal)
-  //   {
-  //     resultIter.Set(0);
-  //   }
-      
-  //   ++resultIter;
-  // }
-
-  // regionIndex[0]=0;
-  // regionIndex[1]=0;
-
-
 }
+
 template<typename TPixel, unsigned int VImageDimension>
 void extractContoursWithValue(const itk::Image<TPixel,VImageDimension>* sliceImage, TPixel contourValue)
 {
