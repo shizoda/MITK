@@ -22,8 +22,6 @@ found in the LICENSE file.
 
 #include <ctkDICOMIndexer.h>
 
-const std::string QmitkDicomLocalStorageWidget::Widget_ID = "org.mitk.Widgets.QmitkDicomLocalStorageWidget";
-
 QmitkDicomLocalStorageWidget::QmitkDicomLocalStorageWidget(QWidget *parent)
   : QWidget(parent), m_LocalIndexer(new ctkDICOMIndexer(parent)), m_Controls(nullptr)
 {
@@ -56,7 +54,7 @@ void QmitkDicomLocalStorageWidget::CreateQtPartControl(QWidget *parent)
     connect(
       m_Controls->ctkDicomBrowser, SIGNAL(seriesDoubleClicked(const QModelIndex &)), this, SLOT(OnViewButtonClicked()));
 
-    connect(m_LocalIndexer, SIGNAL(indexingComplete(int, int, int, int)), this, SIGNAL(SignalFinishedImport()));
+    connect(m_LocalIndexer, SIGNAL(indexingComplete(int, int, int, int)), this, SIGNAL(FinishedImport()));
 
     m_Controls->ctkDicomBrowser->setTableOrientation(Qt::Vertical);
   }
@@ -201,7 +199,7 @@ void QmitkDicomLocalStorageWidget::OnViewButtonClicked()
       QString modality = m_LocalDatabase->fileValue(filesForSeries.at(0), "0008,0060");
       eventProperty.insert("Modality", modality);
     }
-    emit SignalDicomToDataManager(eventProperty);
+    emit DicomToDataManager(eventProperty);
   }
 }
 

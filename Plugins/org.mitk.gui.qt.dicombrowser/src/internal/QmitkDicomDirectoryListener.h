@@ -73,7 +73,7 @@ signals:
     /**
     * \brief signal starts the dicom import with given file list.
     */
-    void SignalStartDicomImport(const QStringList&);
+    void StartDicomImport(const QStringList&);
 
 public slots:
 

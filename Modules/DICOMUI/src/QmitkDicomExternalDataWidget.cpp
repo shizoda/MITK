@@ -23,8 +23,6 @@ found in the LICENSE file.
 #include <QMessageBox>
 #include <QTemporaryFile>
 
-const std::string QmitkDicomExternalDataWidget::Widget_ID = "org.mitk.Widgets.QmitkDicomExternalDataWidget";
-
 QmitkDicomExternalDataWidget::QmitkDicomExternalDataWidget(QWidget *parent)
   : QWidget(parent), m_ProgressDialog(nullptr), m_Controls(nullptr)
 {
@@ -114,7 +112,7 @@ void QmitkDicomExternalDataWidget::OnDownloadButtonClicked()
     info.exec();
     return;
   }
-  emit SignalStartDicomImport(GetFileNamesFromIndex());
+  emit StartDicomImport(GetFileNamesFromIndex());
 }
 
 void QmitkDicomExternalDataWidget::OnViewButtonClicked()
@@ -131,7 +129,7 @@ void QmitkDicomExternalDataWidget::OnViewButtonClicked()
       QString modality = m_ExternalDatabase->fileValue(filesForSeries.at(0), "0008,0060");
       eventProperty.insert("Modality", modality);
     }
-    emit SignalDicomToDataManager(eventProperty);
+    emit DicomToDataManager(eventProperty);
   }
 }
 

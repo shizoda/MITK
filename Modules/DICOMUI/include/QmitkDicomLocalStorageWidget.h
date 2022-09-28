@@ -40,8 +40,6 @@ class MITKDICOMUI_EXPORT QmitkDicomLocalStorageWidget : public QWidget
   Q_OBJECT
 
 public:
-  static const std::string Widget_ID;
-
   /**
    * \brief QmitkDicomLocalStorageWidget(QWidget *parent) constructor.
    *
@@ -70,23 +68,23 @@ public:
 
 signals:
 
-  /// @brief emitted when import into database is finished.
-  void SignalFinishedImport();
+  /// @brief Emitted when import into database is finished.
+  void FinishedImport();
 
   /**
-   * @brief emitted when view button is clicked.
+   * @brief Emitted when view button is clicked.
    * @param _t1 containing dicom UIDs properties.
    */
-  void SignalDicomToDataManager(QHash<QString, QVariant> _t1);
+  void DicomToDataManager(QHash<QString, QVariant> _t1);
 
-  /// \brief emitted if cancel button is pressed.
-  void SignalCancelImport();
+  /// \brief Emitted if cancel button is pressed.
+  void CancelImport();
 
 public slots:
   /// @brief Called when view button was clicked.
   void OnViewButtonClicked();
 
-  /// @brief   Called delete button was clicked.
+  /// @brief Called delete button was clicked.
   void OnDeleteButtonClicked();
 
   /// @brief   Called when adding a dicom directory. Starts a thread adding the directory.

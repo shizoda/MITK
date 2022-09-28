@@ -52,7 +52,7 @@ void QmitkDicomDirectoryListener::OnDirectoryChanged(const QString&)
         }
         if(!m_FilesToImport.isEmpty())
         {
-            emit SignalStartDicomImport(m_FilesToImport);
+            emit StartDicomImport(m_FilesToImport);
         }
     }
 }

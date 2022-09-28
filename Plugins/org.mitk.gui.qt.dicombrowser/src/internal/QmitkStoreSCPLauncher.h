@@ -15,7 +15,6 @@ found in the LICENSE file.
 
 #include <QProcess>
 #include <QString>
-#include "QmitkStoreSCPLauncherBuilder.h"
 
 /**
 * \brief QmitkStoreSCPLauncher launches the dcmtk storage provider commandline tool in another process and provides basic interoperability with it.
@@ -26,10 +25,20 @@ class QmitkStoreSCPLauncher : public QObject
 
 public:
 
+  struct Params
+  {
+    QString Port = "105";
+    QString AETitle = "STORESCP";
+    QString TransferSyntax = "+x=";
+    QString OtherNetworkOptions = "-pm";
+    QString Mode = "-v";
+    QString OutputDirectory;
+  };
+
     /**
     * \brief QmitkStoreSCPLauncher constructor.
     */
-    QmitkStoreSCPLauncher(QmitkStoreSCPLauncherBuilder* builder);
+    QmitkStoreSCPLauncher(const Params& params);
 
     /**
     * \brief QmitkStoreSCPLauncher constructor.
@@ -64,38 +73,30 @@ signals:
     * \brief signal is emitted if status of storage provider process has changend.
     * \param QString containing m_StatusText.
     */
-    void SignalStatusOfStoreSCP(const QString&);
+    void StoreSCPStatusChanged(const QString&);
 
     /**
     * \brief signal is emitted an error occours while storage provider process is running.
     * \param QString containing m_ErrorText.
     */
-    void SignalStoreSCPError(const QString& errorText = "");
+    void StoreSCPError(const QString& errorText = "");
 
     /**
     * \brief signal is emitted when storage provider process starts storing dicom files.
     * \param QStringList& of processed dicom files.
     */
-    void SignalStartImport(const QStringList&);
+    void StartImport(const QStringList&);
 
     /**
     * \brief signal is emitted if import of storage provider process has finished.
     * \note currently not used.
     */
-    void SignalFinishedImport();
+    void FinishedImport();
 
 private:
 
-    /**
-    * \brief DicomEventHandler constructor.
-    */
     void FindPathToStoreSCP();
-
-    /**
-    * \brief DicomEventHandler constructor.
-    * \param QmitkStoreSCPLauncherBuilder* to builder object.
-    */
-    void SetArgumentList(QmitkStoreSCPLauncherBuilder* builder);
+    void SetArgumentList(const Params& params);
 
     /**
     * \brief Converts the m_ArgumentList into a QString containing all arguments from list.

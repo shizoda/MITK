@@ -41,8 +41,6 @@ class MITKDICOMUI_EXPORT QmitkDicomExternalDataWidget : public QWidget
   Q_OBJECT
 
 public:
-  static const std::string Widget_ID;
-
   /**
   * \brief QmitkDicomExternalDataWidget(QWidget *parent) constructor.
   *
@@ -69,11 +67,11 @@ public:
 
 signals:
 
-  /// @brief emitted when import into database is finished.
-  void SignalStartDicomImport(const QStringList &);
+  /// @brief Emitted when import into database is finished.
+  void StartDicomImport(const QStringList &);
 
-  /// @brief emitted when view button is clicked.
-  void SignalDicomToDataManager(QHash<QString, QVariant>);
+  /// @brief Emitted when view button is clicked.
+  void DicomToDataManager(QHash<QString, QVariant>);
 
 public slots:
 

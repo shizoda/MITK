@@ -10,52 +10,29 @@ found in the LICENSE file.
 
 ============================================================================*/
 
-#include "mitkPluginActivator.h"
-#include "DicomEventHandler.h"
-#include <service/event/ctkEventConstants.h>
-#include <ctkDictionary.h>
-#include <mitkLogMacros.h>
-#include <mitkDataNode.h>
-#include <mitkIDataStorageService.h>
-#include <service/event/ctkEventAdmin.h>
-#include <ctkServiceReference.h>
-#include <mitkRenderingManager.h>
-#include <QVector>
-#include "mitkImage.h"
-#include <mitkContourModelSet.h>
-#include <mitkFileReaderRegistry.h>
-#include <mitkDICOMRTMimeTypes.h>
-
-#include <mitkDICOMFileReaderSelector.h>
-#include <mitkDICOMDCMTKTagScanner.h>
-#include <mitkDICOMEnums.h>
-#include <mitkDICOMTagsOfInterestHelper.h>
-#include <mitkDICOMProperty.h>
-#include <mitkPropertyNameHelper.h>
-#include "mitkBaseDICOMReaderService.h"
-
-#include <mitkRTConstants.h>
-#include <mitkIsoDoseLevelCollections.h>
-#include <mitkIsoDoseLevelSetProperty.h>
-#include <mitkIsoDoseLevelVectorProperty.h>
-#include <mitkDoseImageVtkMapper2D.h>
-#include <mitkRTUIConstants.h>
-#include <mitkIsoLevelsGenerator.h>
-#include <mitkDoseNodeHelper.h>
-
-#include <vtkSmartPointer.h>
-#include <vtkMath.h>
-#include <mitkTransferFunction.h>
-#include <mitkTransferFunctionProperty.h>
-#include <mitkRenderingModeProperty.h>
-#include <mitkLocaleSwitch.h>
-#include <mitkIOUtil.h>
-
-#include <berryIPreferencesService.h>
 #include <berryIPreferences.h>
+#include <berryIPreferencesService.h>
 #include <berryPlatform.h>
 
-#include <ImporterUtil.h>
+#include <mitkBaseDICOMReaderService.h>
+#include <mitkContourModelSet.h>
+#include <mitkDICOMEnums.h>
+#include <mitkDICOMRTMimeTypes.h>
+#include <mitkDoseNodeHelper.h>
+#include <mitkFileReaderRegistry.h>
+#include <mitkIDataStorageService.h>
+#include <mitkIOUtil.h>
+#include <mitkIsoLevelsGenerator.h>
+#include <mitkPropertyNameHelper.h>
+#include <mitkRenderingManager.h>
+#include <mitkRTUIConstants.h>
+#include <mitkUtf8Util.h>
+
+#include <service/event/ctkEventAdmin.h>
+#include <service/event/ctkEventConstants.h>
+
+#include "mitkPluginActivator.h"
+#include "QmitkDicomEventHandler.h"
 
 namespace
 {
@@ -72,15 +49,15 @@ namespace
   }
 }
 
-DicomEventHandler::DicomEventHandler()
+QmitkDicomEventHandler::QmitkDicomEventHandler()
 {
 }
 
-DicomEventHandler::~DicomEventHandler()
+QmitkDicomEventHandler::~QmitkDicomEventHandler()
 {
 }
 
-void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
+void QmitkDicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
 {
   QStringList listOfFilesForSeries;
   listOfFilesForSeries = ctkEvent.getProperty("FilesForSeries").toStringList();
@@ -98,8 +75,8 @@ void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
 
       if(modality.compare("RTDOSE",Qt::CaseInsensitive) == 0)
       {
-          auto doseReader = GetReader(readerRegistry, mitk::DICOMRTMimeTypes::DICOMRT_DOSE_MIMETYPE());
-          doseReader->SetInput(ImporterUtil::getUTF8String(listOfFilesForSeries.front()));
+          auto doseReader = GetReader(readerRegistry, mitk::DICOMRTMimeTypes::DICOMRT_DOSE_MIMETYPE());          
+          doseReader->SetInput(mitk::Utf8Util::Local8BitToUtf8(listOfFilesForSeries.front().toStdString()));
           std::vector<itk::SmartPointer<mitk::BaseData> > readerOutput = doseReader->Read();
           if (!readerOutput.empty()){
             mitk::Image::Pointer doseImage = dynamic_cast<mitk::Image*>(readerOutput.at(0).GetPointer());
@@ -145,7 +122,7 @@ void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
       else if(modality.compare("RTSTRUCT",Qt::CaseInsensitive) == 0)
       {
           auto structReader = GetReader(readerRegistry, mitk::DICOMRTMimeTypes::DICOMRT_STRUCT_MIMETYPE());
-          structReader->SetInput(ImporterUtil::getUTF8String(listOfFilesForSeries.front()));
+          structReader->SetInput(mitk::Utf8Util::Local8BitToUtf8(listOfFilesForSeries.front().toStdString()));
           std::vector<itk::SmartPointer<mitk::BaseData> > readerOutput = structReader->Read();
 
           if (readerOutput.empty()){
@@ -176,7 +153,7 @@ void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
       else if (modality.compare("RTPLAN", Qt::CaseInsensitive) == 0)
       {
           auto planReader = GetReader(readerRegistry, mitk::DICOMRTMimeTypes::DICOMRT_PLAN_MIMETYPE());
-          planReader->SetInput(ImporterUtil::getUTF8String(listOfFilesForSeries.front()));
+          planReader->SetInput(mitk::Utf8Util::Local8BitToUtf8(listOfFilesForSeries.front().toStdString()));
           std::vector<itk::SmartPointer<mitk::BaseData> > readerOutput = planReader->Read();
           if (!readerOutput.empty()){
               //there is no image, only the properties are interesting
@@ -200,9 +177,7 @@ void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
       QStringListIterator it(listOfFilesForSeries);
 
       while (it.hasNext())
-      {
-		  seriesToLoad.push_back(ImporterUtil::getUTF8String(it.next()));
-      }
+  		  seriesToLoad.push_back(mitk::Utf8Util::Local8BitToUtf8(it.next().toStdString()));
 
       //Get Reference for default data storage.
       ctkServiceReference serviceReference = mitk::PluginActivator::getContext()->getServiceReference<mitk::IDataStorageService>();
@@ -239,11 +214,11 @@ void DicomEventHandler::OnSignalAddSeriesToDataManager(const ctkEvent& ctkEvent)
   }
 }
 
-void DicomEventHandler::OnSignalRemoveSeriesFromStorage(const ctkEvent& /*ctkEvent*/)
+void QmitkDicomEventHandler::OnSignalRemoveSeriesFromStorage(const ctkEvent& /*ctkEvent*/)
 {
 }
 
-void DicomEventHandler::SubscribeSlots()
+void QmitkDicomEventHandler::SubscribeSlots()
 {
   ctkServiceReference ref = mitk::PluginActivator::getContext()->getServiceReference<ctkEventAdmin>();
   if (ref)
