@@ -5,6 +5,13 @@
 set(MITK_CMAKE_MINIMUM_REQUIRED_VERSION 3.18)
 cmake_minimum_required(VERSION ${MITK_CMAKE_MINIMUM_REQUIRED_VERSION})
 
+if(WIN32)
+	# Prevent errors caused by non-English characters
+	message("Disabling Warning 4819")
+    add_definitions("/wd4819")
+endif()
+
+
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19 AND CMAKE_VERSION VERSION_LESS 3.19.2)
   message(FATAL_ERROR "\
 CMake v${CMAKE_VERSION} is defective [1]. \
@@ -359,6 +366,14 @@ if(MITK_USE_cpprestsdk)
 endif()
 
 if(MITK_USE_Python3)
+
+  if(UNIX)
+    set(Python3_EXECUTABLE $ENV{HOME}/miniconda3/bin/python)
+  else()
+    set(Python3_EXECUTABLE C:/misc/miniconda3/python.exe)
+  endif()
+  message("Python3_EXECUTABLE:" ${Python3_EXECUTABLE})
+
   set(MITK_USE_ZLIB ON CACHE BOOL "" FORCE)
 
   if(APPLE AND CMAKE_FRAMEWORK_PATH AND CMAKE_FRAMEWORK_PATH MATCHES "python3\\.?([0-9]+)")
